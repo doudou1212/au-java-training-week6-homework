@@ -143,3 +143,13 @@ Check the user info:
 
 - user-management-api test coverage is not 100%.
 - docker-compose is vulnerable，when access user-management-api by api gateway or user server directly, it's easy to break docker container (user-management-api, api-gateway).
+
+## Reference
+
+email management api: https://github.com/doudou1212/email-management-api
+
+user management api: https://github.com/doudou1212/user-management-api
+
+eureka server(server center): https://github.com/doudou1212/server-center
+
+api gateway: https://github.com/doudou1212/api-gateway
