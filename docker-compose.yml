@@ -1,0 +1,95 @@
+version: "3.7"
+
+services:
+  eureka_server:
+    image: gradle:5.6.3-jdk11
+    environment:
+      PORT: 9000
+    working_dir: /app
+    volumes:
+      - ./server-center:/app
+      - gradle-cache-eureka-server:/home/gradle/.gradle
+    ports:
+      - 9000:9000
+    networks:
+      - app_net
+    command: gradle bootRun
+
+  postgres_base:
+    image: postgres:11.5
+    restart: always
+    environment:
+      POSTGRES_USER: usermanagement
+      POSTGRES_PASSWORD: password10
+      POSTGRES_DB: user
+    networks:
+      - app_net
+    volumes:
+      - db-cache:/var/lib/postgresql/data
+    ports:
+      - 5434:5432
+
+  user_management_api:
+    image: gradle:5.6.3-jdk11
+    environment:
+      PORT: 9001
+    working_dir: /app
+    volumes:
+      - ./user-management-api:/app
+      - gradle-cache-user-management-api:/home/gradle/.gradle
+    networks:
+      - app_net
+    env_file:
+      - ./user-management-api/docker.app.env
+      - ./docker.app.env
+    ports:
+      - 9001:9001
+      - 5007:5005
+    command: gradle bootRun
+    depends_on:
+      - eureka_server
+      - postgres_base
+
+  email_management_api:
+    image: gradle:5.6.3-jdk11
+    environment:
+      PORT: 9002
+    working_dir: /app
+    volumes:
+      - ./email-management-api:/app
+      - gradle-cache-email-management-api:/home/gradle/.gradle
+    networks:
+      - app_net
+    env_file:
+      - ./docker.app.env
+    ports:
+      - 9002:9002
+      - 5008:5005
+    command: gradle bootRun
+
+  api_gateway:
+    image: gradle:5.6.3-jdk11
+    environment:
+      PORT: 8081
+    working_dir: /app
+    volumes:
+      - ./api-gateway:/app
+      - gradle-cache-api-gateway:/home/gradle/.gradle
+    networks:
+      - app_net
+    env_file:
+      - ./docker.app.env
+    ports:
+      - 8081:8081
+      - 5009:5005
+    command: gradle bootRun
+
+networks:
+  app_net:
+
+volumes:
+  db-cache:
+  gradle-cache-eureka-server:
+  gradle-cache-user-management-api:
+  gradle-cache-email-management-api:
+  gradle-cache-api-gateway:
